@@ -1,0 +1,11 @@
+{
+  "solution": {
+    "name": "events-client-side-solution",
+    "id": "a35fd879-1e8d-4011-a3a4-a9e6ba445e6c",
+    "version": "1.0.0.0",
+    "skipFeatureDeployment": false
+  },
+  "paths": {
+    "zippedPackage": "solution/events.sppkg"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "entry": "./lib/webparts/uobNewsEvents/UobNewsEventsWebPart.js",
+      "manifest": "./src/webparts/uobNewsEvents/UobNewsEventsWebPart.manifest.json",
+      "outputPath": "./dist/uob-news-events.bundle.js"
+    }
+  ],
+  "externals": {},
+  "localizedResources": {
+    "uobNewsEventsStrings": "webparts/uobNewsEvents/loc/{locale}.js"
+  }
+}
