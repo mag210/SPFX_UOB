@@ -28,6 +28,8 @@ export default class UobNewsEvents extends React.Component<IUobNewsEventsProps, 
     super(props);
     this._onFilterChanged = this._onFilterChanged.bind(this);
 
+   this._onImageChoiceGroupChange = this._onImageChoiceGroupChange.bind(this);
+
 
     this.state = {
       selectedItem: null,
@@ -38,6 +40,7 @@ export default class UobNewsEvents extends React.Component<IUobNewsEventsProps, 
       spinner : {'display':'none'},
       feedType : null,
       loadedFeed: null,
+      selectBoxValue: null
      
     };
   }
@@ -46,7 +49,7 @@ export default class UobNewsEvents extends React.Component<IUobNewsEventsProps, 
 
   public render(): JSX.Element {
 
-    console.log(this.props) ;
+    //console.log(this.props) ;
     console.log(this.state) ;
     
 
@@ -104,6 +107,16 @@ export default class UobNewsEvents extends React.Component<IUobNewsEventsProps, 
             
 
             <div>
+
+
+           <ChoiceGroupImageExample
+            controlFunc={this._onImageChoiceGroupChange}
+
+           
+
+           />   
+
+
 
         <ChoiceGroup
         label='Select a category'
@@ -197,6 +210,14 @@ export default class UobNewsEvents extends React.Component<IUobNewsEventsProps, 
     
         );
       }
+
+
+
+      _onImageChoiceGroupChange(e: React.SyntheticEvent<HTMLElement>, option: IChoiceGroupOption) {
+         console.log("dropdown changed " + option) ;
+    this.setState({ selectBoxValue: option });
+   
+  }
     
       private _onFilterChanged(text: string) {
         let data = this.state ;
@@ -327,4 +348,56 @@ export default class UobNewsEvents extends React.Component<IUobNewsEventsProps, 
 
 
   
+}
+
+import { IChoiceGroupOption } from 'office-ui-fabric-react/lib/ChoiceGroup';
+import { autobind } from 'office-ui-fabric-react/lib/Utilities';
+
+export interface IChoiceGroupImageExampleState {
+  selectedKey: string;
+}
+
+export class ChoiceGroupImageExample extends React.Component<any, IChoiceGroupImageExampleState> {
+  constructor() {
+    super();
+
+    this.state = {
+      selectedKey: 'bar'
+    };
+
+    this._onImageChoiceGroupChange = this._onImageChoiceGroupChange.bind(this);
+  }
+
+  public render() {
+    let { selectedKey } = this.state;
+
+    return (
+      <div>
+        <ChoiceGroup 
+          label='Pick one image'
+          selectedKey={ selectedKey }
+          options={ [
+          {
+            key: 'all',
+            iconProps: { iconName: 'Globe' },
+            text: 'All University'
+          },
+          {
+            key: 'faculty',
+            iconProps: { iconName: 'Group' },
+            text: 'Faculty'
+          }
+        ] }
+          onChange={ this.props.controlFunc }
+          //onChange={this._onImageChoiceGroupChange}
+        />
+      </div>
+    );
+  }
+
+  private _onImageChoiceGroupChange(e: React.SyntheticEvent<HTMLElement>, option: IChoiceGroupOption) {
+    this.setState({
+      selectedKey: option.key
+    });
+  }
 }
