@@ -18,9 +18,7 @@ import styles from './UobNewsEvents.module.scss';
 
 
 
-
-
-
+var appState ;
 
 export default class UobNewsEvents extends React.Component<IUobNewsEventsProps, any> {
 
@@ -28,82 +26,64 @@ export default class UobNewsEvents extends React.Component<IUobNewsEventsProps, 
   constructor(props: IUobNewsEventsProps,) {
 
     super(props);
-    var defaultOptions =
-    [
-      { key: 'news-feed', text: 'All News' },
-      { key: 'research', text: 'Research' },
-      { key: 'grants_and_awards', text: 'Grants and Awards' },
-      { key: 'press_releases', text: 'Press Releases' },
-      { key: 'staff_notices', text: 'Staff Notices' },
-      { key: 'events', text: 'Events' },         
-    ]
-    
     this._onFilterChanged = this._onFilterChanged.bind(this);
+
+
     this.state = {
       selectedItem: null,
       items: null,
       filterText: '',
       cachedData: null,
-      loading : {'display':  'none'},
+      loading : false,
+      spinner : {'display':'none'},
       feedType : null,
-      options: defaultOptions
+      loadedFeed: null,
+     
     };
   }
 
 
 
   public render(): JSX.Element {
-    
-        console.log(styles) ;
-        console.log(this.state) ;
 
-        var showHide ;
-        var appState = this.state ;
+    console.log(this.props) ;
+    console.log(this.state) ;
+    
+
+        var cachedFeed = localStorage.getItem('cacheKey') ;
+        var appProps = this.props.feedProp ;
+         appState = this.state ;  
         var data ;
         try 
         {
-            if (appState.feedType != null)
-              {
-                let type = appState.feedType ;
-                if (type === "ChoiceGroup8-faculty")
-                  {
-                    appState.options =
-                    [
-                      { key: 'arts', text: 'Faculty of Arts' },
-                      { key: 'research', text: 'Faculty of Biomedical Sciences' },
-                      { key: 'grants_and_awards', text: 'Faculty of engineering' },
-                      { key: 'press_releases', text: 'Faculty of Health Sciences' },
-                      { key: 'staff_notices', text: 'Faculty of Science' },
-                      { key: 'events', text: 'Faculty of Social Scieces and Law' },              
-                    ]
-                  }
-                else
-                  {
-                    appState.options =
-                    [
-                      { key: 'news-feed', text: 'All News' },
-                      { key: 'research', text: 'Research' },
-                      { key: 'grants_and_awards', text: 'Grants and Awards' },
-                      { key: 'press_releases', text: 'Press Releases' },
-                      { key: 'staff_notices', text: 'Staff Notices' },
-                      { key: 'events', text: 'Events' },             
-                    ]
-                  }  
-              }
- 
-            if(appState.selectedItem != null)
+          /*
+          if(appProps != null && appState.loadedFeed != appProps)
             {
-              let feed = appState.selectedItem.key ;
-              //console.log(feed) ;
-              showHide = {'display':  'block'};
-              appState.loading = showHide ;
-              this.getData(feed);
+              console.log("loading from prop") ;
+              this.getData(appProps);
             }
-            else
-            {
-              console.log("No data and no feed, loading app") ;
-            }  
-        
+
+
+
+          
+
+          /*
+
+          else if (cachedFeed != null && appState.loadedFeed != cachedFeed)
+          {
+            console.log('Loading from cache ' + ' ' + cachedFeed) 
+            this.getData(cachedFeed);
+          } 
+
+          else
+          {
+            console.log("No data and no feed, loading app") ;
+          }      
+*/
+
+
+          
+         
       }
       catch (error)
       {
@@ -140,28 +120,44 @@ export default class UobNewsEvents extends React.Component<IUobNewsEventsProps, 
             text: 'Faculty'
           }
         ] }
-        onChange={ (item) => this.setState({ feedType: item.currentTarget.id }) }
+        onChange={ (item) => this.setState(
+          {feedType: item.currentTarget.id}) }
         defaultSelectedKey={'all'}
       />
       </div>
       
           <div className='dropdownExample'>
-            <Dropdown 
-              //placeHolder='Select an Option'
+            
+          { this.state.feedType === "ChoiceGroup13-faculty" &&
+            <Dropdown
+              placeHolder='Select an Option'
+              
+              label='Select a faculty news or events feed:'
+              id='Basicdrop1'
+              ariaLabel='Basic dropdown example'
+              //onChanged={ (item) => this.setState({ selectedItem: item }) }     
+              onChanged={ (item) => this.getData(item.key) }
+              options= {this.props.facultyArray}
+              disabled={appState.loading} />
+          }
+          { this.state.feedType != "ChoiceGroup13-faculty" &&
+            <Dropdown
+              placeHolder='Select an Option'
               
               label='Select a news or events feed:'
               id='Basicdrop1'
-              defaultSelectedKey='D'
               ariaLabel='Basic dropdown example'
-              //selectedKey={ selectedItem && selectedItem.key }
-              onChanged={ (item) => this.setState({ selectedItem: item }) }     
-              options= {appState.options}
-            />
+              
+              onChanged={ (item) => this.getData(item.key) }
+              //onChanged={ (item) => this.setState({ selectedItem: item }) }     
+              options= {this.props.uniArray}
+              disabled={appState.loading} />
+          }    
           
             </div>
             
 
-            <div className='loading' style={appState.loading}> 
+            <div className='loading' style={this.state.spinner}> 
               <Spinner size={ SpinnerSize.large } label='Gettings events...' />
            </div>
            
@@ -171,21 +167,17 @@ export default class UobNewsEvents extends React.Component<IUobNewsEventsProps, 
                 items={ this.state.items }
                 onRenderCell={ (item, index) => (
                   <div className='ms-ListBasicExample-itemCell' data-is-focusable={ true }>
-                    <Image
-                      className='ms-ListBasicExample-itemImage'
-                      src={ item.thumbnail }
-                      width={ 50 }
-                      height={ 50 }
-                      imageFit={ ImageFit.cover }
-                    />
+                    
                     <div className='ms-ListBasicExample-itemContent'>
                       <h3 className='ms-fontSize-xl'>{ item.title }</h3>
                       <p className='ms-fontSize-l'>{ item.description }</p>
+                      
                     </div>
+                    <a href={item.link} target='_blank'>
                     <Icon
                       className='ms-ListBasicExample-chevron'
-                      iconName={ getRTL() ? 'ChevronLeft' : 'ChevronRight' }
-                    />
+                      iconName={ getRTL() ? 'ChevronLeft':'ChevronRight' }
+                    /></a>
                   </div>
                 ) }
               />
@@ -197,7 +189,7 @@ export default class UobNewsEvents extends React.Component<IUobNewsEventsProps, 
                 className= { styles.spacer}
                 data-automation-id='test'   
                 text='Save Selection'
-                disabled={false}
+                disabled={appState.loading}
                 onClick={this._buttonOnClickHandler.bind(this)}
               />
             </div>
@@ -211,7 +203,7 @@ export default class UobNewsEvents extends React.Component<IUobNewsEventsProps, 
         let items = this.state.items ;
         let cachedData = this.state.cachedData ;
     
-        console.log(items) ;
+       // console.log(items) ;
     
         try {
 
@@ -238,7 +230,21 @@ export default class UobNewsEvents extends React.Component<IUobNewsEventsProps, 
     
     
       private _buttonOnClickHandler() {
-        alert('You clicked the primary button');
+
+       
+
+        if (this.state.loadedFeed != null)
+        {
+          let cacheVal = this.state.loadedFeed ;
+          localStorage.setItem("cacheKey", cacheVal);
+          alert("Your feed preferences have been saved") ;
+        }
+        else
+        {
+          alert("Please select a feed before clicking save") ;
+        }    
+       
+
         return false;
       }
     
@@ -255,12 +261,34 @@ export default class UobNewsEvents extends React.Component<IUobNewsEventsProps, 
         this.setState({ showPanel: false });
       }
     
-    
+     
     
       private getData(feed)
       {
+        let showHide = {'display':  'block'};
+        
+        this.setState({spinner:  showHide, loading: true   
+        }) ;
+       
+        console.log(feed) ;
+
+        
+
+
+        /*
+        this.state.loading = true ;
+        this.state.spinner = showHide ;*/
         let items ;
-        this.props.HttpClient.get("https://spfx-getevents.azurewebsites.net/",
+
+
+
+        
+
+
+
+          console.log(feed) ;
+
+        this.props.HttpClient.get("https://spfx-getevents.azurewebsites.net/?feed="+feed,
         HttpClient.configurations.v1, {
           mode: 'cors'
         })
@@ -271,14 +299,21 @@ export default class UobNewsEvents extends React.Component<IUobNewsEventsProps, 
         .then((data: any): void => {
           
           var events = JSON.parse(data) ;
-          let showHide = {'display':  'none'};
+          let showHide = {'display':'none'};
           items = events.items ;
+          
+
+         
+          
           this.setState({
             items: items,
             cachedData: items,
             selectedItem: null,
-            loading: showHide   
-          }) ;   
+            loading: false,
+            spinner: showHide,
+            loadedFeed: feed,
+          }) ;
+         
         })
         .catch((error: any): void => {
           console.log(error) ;
